@@ -4,6 +4,13 @@ namespace Core
     {
         private const decimal MaxWeightDifferencePercentage = 0.2m;
         public readonly List<ContainerStack> Stacks = new();
+        public List<ContainerStack> SortedStacks
+        {
+            get
+            {
+                return Stacks.OrderBy(stack => stack.Position).ToList();
+            }
+        }
         public List<Container> FailedContainers { get; private set; } = new();
 
         private bool IsFull { get; set; }
@@ -95,7 +102,7 @@ namespace Core
 
             if (valuableContainers.Count > Stacks.Count)
                 throw new ArgumentException(
-                $"Too many valuable containers for this row, only add the ships width amount of valuable containers (= {Stacks.Count})");
+                $"Too many valuable containers for this row, only add the ships width amount of valuable containers in 1 row. (= {Stacks.Count})");
 
             foreach (var stack in Stacks)
             {

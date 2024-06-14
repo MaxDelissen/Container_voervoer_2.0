@@ -209,4 +209,17 @@ public class Ship
         }
         return rows;
     }
+
+    public List<Container> GetTotalPlacedContainers()
+    {
+        var placedContainers = new List<Container>();
+        foreach (var row in SortedRows)
+        {
+            foreach (var stack in row.Stacks)
+            {
+                placedContainers.AddRange(stack.Containers);
+            }
+        }
+        return placedContainers;
+    }
 }

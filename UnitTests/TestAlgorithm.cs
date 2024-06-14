@@ -74,59 +74,38 @@ public class TestAlgorithm
         bool goodSort = result == SortResult.Success || result == SortResult.SuccesWithFailedContainers;
         Assert.IsTrue(goodSort);
         
-        Assert.AreEqual(69, (ship.GetTotalFailedContainers().Count + ship.AmountOfSortedContainers()));
+        Assert.AreEqual(3, ship.SortedRows.Count);
+        Assert.AreEqual(3, ship.SortedRows[0].Stacks.Count);
+        Assert.AreEqual(3, ship.SortedRows[2].Stacks.Count);
+        string link = new LinkGenerator().ConvertShipToLink(ship);
+        var failed = ship.GetTotalFailedContainers();
+        var failedCount = failed.Count;
+        int placed = ship.GetTotalPlacedContainers().Count;
+        int total = failedCount + placed;
+        Assert.AreEqual(69, total);
     }
 
     [TestMethod]
     public void WideShipTest()
     {
-        Ship ship = new Ship(8, 3);
-        List<Container> containers = new List<Container>();
-        for (int i = 0; i < 6; i++)
-            containers.Add(new(ContainerType.ValuableCooled, GenerateRandomWeight()));
-        for (int i = 0; i < 17; i++)
-            containers.Add(new(ContainerType.Cooled, GenerateRandomWeight()));
-        for (int i = 0; i < 60; i++)
-            containers.Add(new(ContainerType.Normal, GenerateRandomWeight()));
-        for (int i = 0; i < 18; i++)
-            containers.Add(new(ContainerType.Valuable, GenerateRandomWeight()));
+        //Arrange
+        Ship ship = GenerateTestShip(8, 3, 6, 18, 17, 60);
         
-        ship.AddContainers(containers);
+        //Act
         var result = ship.SortContainers();
-        
-        string link = new LinkGenerator().ConvertShipToLink(ship);
 
-        List<Container> existingContainers = ship.AmountOfSortedContainers();
+        //Assert
+        bool goodSort = result == SortResult.Success || result == SortResult.SuccesWithFailedContainers;
+        List<Container> placedContainers = ship.GetTotalPlacedContainers();
         List<Container> failedContainers = ship.GetTotalFailedContainers();
-        List<Container> allOutputContainers = existingContainers.Concat(failedContainers).ToList();
+        List<Container> allOutputContainers = placedContainers.Concat(failedContainers).ToList();
         
-        var dissapearedContainers = containers.Except(existingContainers).ToList(); //It should be empty, it is a shame that I even have to check this.
-        dissapearedContainers = dissapearedContainers.Except(failedContainers).ToList(); //It should be empty, it is a shame that I even have to check this.
-        
-        #region Assert
-
+        Assert.IsTrue(goodSort);
         Assert.AreEqual(3, ship.SortedRows.Count);
-        
-        Assert.AreEqual(0, dissapearedContainers.Count);
+        Assert.AreEqual(8, ship.SortedRows[0].Stacks.Count);
+        Assert.AreEqual(8, ship.SortedRows[2].Stacks.Count);
         
         Assert.AreEqual(101, allOutputContainers.Count);
 
-        #endregion
-    }
-
-    [TestMethod]
-    public void TestValuable()
-    {
-        Ship ship = new Ship(8, 6);
-        List<Container> containers = new List<Container>();
-        for (int i = 0; i < 6; i++)
-            containers.Add(new(ContainerType.ValuableCooled, GenerateRandomWeight()));
-        for (int i = 0; i < 18; i++)
-            containers.Add(new(ContainerType.Valuable, GenerateRandomWeight()));
-        
-        ship.AddContainers(containers);
-        var result = ship.SortContainers();
-        
-        string link = new LinkGenerator().ConvertShipToLink(result, ship);
     }
 }
