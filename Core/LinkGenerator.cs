@@ -47,6 +47,13 @@ public class LinkGenerator
                 }
             }
         }
+
+        if (stacksBuilder.Length > 0 && stacksBuilder[^1] == '/')
+        {
+            stacksBuilder.Length--;
+            weightsBuilder.Length--;
+        }
+        
         return (stacksBuilder.ToString(), weightsBuilder.ToString());
     }
 
