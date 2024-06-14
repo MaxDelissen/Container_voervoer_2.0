@@ -51,14 +51,24 @@ namespace Core
             var sortedStacks = Stacks.OrderBy(stack => stack.CalculateTotalWeight()).ToList();
             var leftWeight = CalculateSideWeight(ShipSide.Left);
             var rightWeight = CalculateSideWeight(ShipSide.Right);
-            ShipSide lightestSide = leftWeight < rightWeight ? ShipSide.Left : ShipSide.Right;
+            var centerWeight = CalculateSideWeight(ShipSide.Center);
 
+            if (centerWeight < leftWeight && centerWeight < rightWeight) //Check if center is lightest
+            {
+                if (TryPlaceContainerOnSide(container, ShipSide.Center))
+                {
+                    return true;
+                }
+            }
+            
+            ShipSide lightestSide = leftWeight < rightWeight ? ShipSide.Left : ShipSide.Right; //Place on lightest side
             if (TryPlaceContainerOnSide(container, lightestSide))
             {
                 return true;
             }
 
-            var totalWeight = leftWeight + rightWeight + CalculateSideWeight(ShipSide.Center);
+            var totalWeight = leftWeight + rightWeight + CalculateSideWeight(ShipSide.Center); 
+            //if it doesn't fit on lightest side, check if it fits on other side while keeping weight difference in mind
             var difference = Math.Abs(leftWeight - rightWeight);
             var maxDifference = totalWeight * MaxWeightDifferencePercentage;
 
