@@ -3,7 +3,18 @@ namespace Core;
 public class Ship
 {
     // List of containers to be sorted
-    public readonly List<Container> ContainersToSort = new();
+    private readonly List<Container> containersToSort = new();
+
+    public List<ContainerRow> SortedRows
+    {
+        get => sortedRows ?? throw new NotSortedException("The rows are not sorted.");
+        private set => sortedRows = value;
+    }
+
+    private List<ContainerRow>? sortedRows;
+
+
+    public int AmountOfSortedContainers => (SortedRows).Sum(r => r.Stacks.Sum(s => s.Containers.Count));
 
     // Constructor for the Ship class
     public Ship(int width, int length)
@@ -20,8 +31,6 @@ public class Ship
     public int MaxWeight { get; } // Maximum weight the ship can carry
     public int MinWeight { get; } // Minimum weight the ship needs to carry to avoid tipping over
 
-    // List of containers that have been sorted
-    public List<Container> SortedContainers { get; private set; } = new();
 
     // Method to calculate the maximum weight the ship can carry
     private int CalculateMaxWeight()
@@ -33,7 +42,7 @@ public class Ship
         return maxWeight;
     }
 
-    public int ContainerToSortCount() => ContainersToSort.Count;
+    public int ContainerToSortCount() => containersToSort.Count;
 
     // Method to add a single container to the ship
     public bool AddContainer(Container container)
@@ -41,7 +50,7 @@ public class Ship
         if (container.Weight > 30)
             return false;
 
-        ContainersToSort.Add(container);
+        containersToSort.Add(container);
         return true;
     }
 
@@ -51,55 +60,67 @@ public class Ship
         if (containers.Any(c => c.Weight > 30))
             return false;
 
-        ContainersToSort.AddRange(containers);
+        containersToSort.AddRange(containers);
         return true;
     }
 
-    public bool IsOverWeight()
+    private bool IsOverWeight()
     {
-        int totalWeight = ContainersToSort.Sum(c => c.Weight);
+        int totalWeight = containersToSort.Sum(c => c.Weight);
         return totalWeight > MaxWeight;
     }
 
-    public bool IsUnderWeight()
+    private bool IsUnderWeight()
     {
-        int totalWeight = ContainersToSort.Sum(c => c.Weight);
+        int totalWeight = containersToSort.Sum(c => c.Weight);
         return totalWeight < MinWeight;
     }
 
-    public bool HasTooManyCooledValuableContainers()
+    private bool HasTooManyCooledValuableContainers()
     {
-        int cooledValuableContainers = ContainersToSort.Count(c => c.Type == ContainerType.ValuableCooled);
+        int cooledValuableContainers = containersToSort.Count(c => c.Type == ContainerType.ValuableCooled);
         return cooledValuableContainers > Width;
     }
 
-    public bool HasTooManyCooledContainers()
+    private bool HasTooManyCooledContainers()
     {
-        int cooledTotalWeight = ContainersToSort.Where(c => c.Type == ContainerType.Cooled).Sum(c => c.Weight);
+        int cooledTotalWeight = containersToSort.Where(c => c.Type == ContainerType.Cooled).Sum(c => c.Weight);
         int weightPerStack = cooledTotalWeight / Width;
         return weightPerStack > 150;
     }
+    
+    private List<Container> FailedContainers { get; set; } = new();
 
     // Method to sort the containers on the ship
-    public List<ContainerRow> SortContainers()
+    public SortResult SortContainers()
     {
+        if (IsOverWeight())
+            return SortResult.OverWeight;
+        if (IsUnderWeight())
+            return SortResult.UnderWeight;
+        if (HasTooManyCooledValuableContainers())
+            return SortResult.TooManyCooledValuableContainers;
+        if (HasTooManyCooledContainers())
+            return SortResult.TooManyCooledContainers;
+        
+        
         // Sorting containers by type and weight
-        List<Container> cooledContainers = ContainersToSort
+        List<Container> cooledContainers = containersToSort
             .Where(c => c.Type == ContainerType.Cooled)
             .OrderByDescending(c => c.Weight)
             .ToList();
 
-        List<Container> valuableContainers = ContainersToSort
+        List<Container> valuableContainers = containersToSort
             .Where(c => c.Type == ContainerType.Valuable)
             .OrderByDescending(c => c.Weight)
             .ToList();
 
-        List<Container> valuableCooledContainers = ContainersToSort
+        List<Container> valuableCooledContainers = containersToSort
             .Where(c => c.Type == ContainerType.ValuableCooled)
             .OrderByDescending(c => c.Weight)
             .ToList();
 
-        List<Container> normalContainers = ContainersToSort
+        List<Container> normalContainers = containersToSort
             .Where(c => c.Type == ContainerType.Normal)
             .OrderByDescending(c => c.Weight)
             .ToList();
@@ -125,34 +146,20 @@ public class Ship
                 rows[valuableIndex].MakeValuableRow(containersToAdd);
                 valuableContainers.RemoveRange(0, Width);
                 valuableIndex++;
-                if (valuableIndex + 1 % 3 == 0)
+                if (((float)valuableIndex + 1) % 3 == 0)
                 {
                     valuableIndex++;
                 }
             }
+            FailedContainers.AddRange(valuableContainers);
         }
-
-        int CalculateWeight(ShipSide side)
-        {
-            int totalWeight = 0;
-            foreach (var containerRow in rows)
-            {
-                totalWeight += containerRow.Stacks.Where(s => s.Position == side).Sum(s => s.CalculateTotalWeight());
-            }
-            return totalWeight;
-        }
-
-        int totalLeftWeight;
-        int totalRightWeight;
 
         // Placing cooled containers on the first row
         if (cooledContainers.Any())
         {
             foreach (var container in cooledContainers)
             {
-                totalLeftWeight = CalculateWeight(ShipSide.Left);
-                totalRightWeight = CalculateWeight(ShipSide.Right);
-                rows[0].TryAddContainer(container, totalLeftWeight, totalRightWeight);
+                rows[0].TryAddContainer(container);
             }
         }
 
@@ -163,20 +170,34 @@ public class Ship
             {
                 foreach (var row in rows)
                 {
-                    totalLeftWeight = CalculateWeight(ShipSide.Left);
-                    totalRightWeight = CalculateWeight(ShipSide.Right);
-                    if (row.TryAddContainer(container, totalLeftWeight, totalRightWeight))
+                    if (row.TryAddContainer(container))
                     {
                         break;
                     }
                 }
+                FailedContainers.Add(container);
             }
         }
 
         // Moving the bottom containers to the top.
         rows = MoveBottomContainersToTop(rows);
+        
+        SortedRows = rows;
 
-        return rows;
+        if (GetTotalFailedContainers().Count > 0)
+            return SortResult.SuccesWithFailedContainers;
+        return SortResult.Success;
+    }
+    
+    public List<Container> GetTotalFailedContainers()
+    {
+        var failedContainers = new List<Container>();
+        foreach (var row in SortedRows)
+        {
+            failedContainers.AddRange(row.FailedContainers);
+        }
+        failedContainers.AddRange(this.FailedContainers);
+        return failedContainers;
     }
 
     // Method to move the bottom containers to the top, this because the placing order is reversed.

@@ -9,3 +9,4 @@
 /home/max/RiderProjects/Container voervoer 2.0/Core/obj/Debug/net8.0/refint/Core.dll
 /home/max/RiderProjects/Container voervoer 2.0/Core/obj/Debug/net8.0/Core.pdb
 /home/max/RiderProjects/Container voervoer 2.0/Core/obj/Debug/net8.0/ref/Core.dll
+/home/max/RiderProjects/Container voervoer 2.0/Core/obj/Debug/net8.0/Core.sourcelink.json

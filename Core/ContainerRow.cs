@@ -1,140 +1,147 @@
-namespace Core;
-
-public class ContainerRow
+namespace Core
 {
-    private const decimal MaxWeightDifferencePercentage = 0.2m;
-    public readonly List<ContainerStack> Stacks = new();
-
-    private bool IsFull { get; set; }
-
-    public bool TryAddContainer(Container container, int totalLeftWeight, int totalRightWeight)
+    public class ContainerRow
     {
-        if (IsFull)
-            return false;
+        private const decimal MaxWeightDifferencePercentage = 0.2m;
+        public readonly List<ContainerStack> Stacks = new();
+        public List<Container> FailedContainers { get; private set; } = new();
 
-        // Sort the stacks in ascending order based on their total weight
-        var sortedStacks = Stacks.OrderBy(stack => stack.CalculateTotalWeight()).ToList();
+        private bool IsFull { get; set; }
 
-        foreach (var stack in sortedStacks)
+        #region Init
+
+        public ContainerRow(int shipWidth)
         {
-            /*if (IsWeightDifferenceAcceptable(container, stack.Position, totalLeftWeight, totalRightWeight))
-            {*/
-            if (stack.TryAddContainer(container))
+            bool hasCenterStack = shipWidth % 2 != 0;
+            if (hasCenterStack)
             {
-                UpdateFullStatus();
+                Stacks.Add(new ContainerStack(ShipSide.Center));
+                shipWidth--;
+                AddStacks(shipWidth);
+            }
+            else
+            {
+                AddStacks(shipWidth);
+            }
+        }
+
+        private void AddStacks(int shipWidth)
+        {
+            for (int i = 0; i < shipWidth / 2; i++)
+            {
+                Stacks.Add(new ContainerStack(ShipSide.Left));
+                Stacks.Add(new ContainerStack(ShipSide.Right));
+            }
+        }
+
+        #endregion
+
+        public bool TryAddContainer(Container container)
+        {
+            if (IsFull)
+                return false;
+
+            var sortedStacks = Stacks.OrderBy(stack => stack.CalculateTotalWeight()).ToList();
+            var leftWeight = CalculateSideWeight(ShipSide.Left);
+            var rightWeight = CalculateSideWeight(ShipSide.Right);
+            ShipSide lightestSide = leftWeight < rightWeight ? ShipSide.Left : ShipSide.Right;
+
+            if (TryPlaceContainerOnSide(container, lightestSide))
+            {
                 return true;
             }
-            /*}*/
-        }
 
-        return false;
-    }
+            var totalWeight = leftWeight + rightWeight + CalculateSideWeight(ShipSide.Center);
+            var difference = Math.Abs(leftWeight - rightWeight);
+            var maxDifference = totalWeight * MaxWeightDifferencePercentage;
 
-    public bool MakeValuableRow(List<Container> valuableContainers)
-    {
-        if (IsFull)
-            return false;
-
-        bool containsWrongType = valuableContainers.Any(container =>
-            container.Type != ContainerType.Valuable && container.Type != ContainerType.ValuableCooled);
-        if (containsWrongType)
-            throw new ArgumentException("Not all containers are of type Valuable");
-
-        if (valuableContainers.Count > Stacks.Count)
-            throw new ArgumentException(
-            $"Too many valuable containers for this row, only add the ships width amount of valuable containers (= {Stacks.Count})");
-
-        foreach (var stack in Stacks)
-        {
-            bool result = stack.TryAddContainer(valuableContainers[0]);
-            if (!result)
-                return false;
-
-            valuableContainers.RemoveAt(0);
-        }
-
-        if (valuableContainers.Count > 0)
-            throw new Exception(
-            "Not all valuable containers could be added to the row, this should not happen, and should have been caught earlier");
-
-        UpdateFullStatus();
-        return true;
-    }
-
-    private void UpdateFullStatus()
-    {
-        IsFull = Stacks.All(stack => stack.IsFull());
-    }
-
-    [Obsolete("This method is not used anymore, and should be removed")]
-    private bool IsWeightDifferenceAcceptable(Container container, ShipSide side, int leftWeight, int rightWeight)
-    {
-        if (side == ShipSide.Left)
-        {
-            leftWeight += container.Weight;
-        }
-        else if (side == ShipSide.Right)
-        {
-            rightWeight += container.Weight;
-        }
-        int totalWeight = leftWeight + rightWeight;
-
-        int weightDifference = Math.Abs(leftWeight - rightWeight);
-        double maxAllowedDifference = totalWeight * (double)MaxWeightDifferencePercentage;
-
-        return weightDifference <= maxAllowedDifference;
-    }
-
-    [Obsolete("This method is not used anymore, and should be removed")]
-    private int CalculateSideWeight(ShipSide side)
-    {
-        int totalWeight = 0;
-        foreach (var stack in Stacks)
-        {
-            if (stack.Position == side)
+            if (difference < maxDifference)
             {
-                totalWeight += stack.CalculateTotalWeight();
+                if (TryPlaceContainerOnSide(container, ShipSide.Right))
+                {
+                    return true;
+                }
             }
+            
+            return false;
         }
-        return totalWeight;
-    }
 
-    public bool MoveBottomContainersToTop()
-    {
-        foreach (var stack in Stacks)
+        private bool TryPlaceContainerOnSide(Container container, ShipSide lightestSide)
         {
-            bool success = stack.MoveBottomContainerToTop();
-            if (!success)
-                return false;
+            foreach (var stack in Stacks)
+            {
+                if (stack.Position == lightestSide)
+                {
+                    if (stack.TryAddContainer(container))
+                    {
+                        UpdateFullStatus();
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
-        return true;
-    }
 
-    #region Init
-
-    public ContainerRow(int shipWidth)
-    {
-        bool hasCenterStack = shipWidth % 2 != 0;
-        if (hasCenterStack)
+        public void MakeValuableRow(List<Container> valuableContainers)
         {
-            Stacks.Add(new ContainerStack(ShipSide.Center));
-            shipWidth--;
-            AddStacks(shipWidth);
+            if (IsFull)
+                return;
+
+            bool containsWrongType = valuableContainers.Any(container =>
+                container.Type != ContainerType.Valuable && container.Type != ContainerType.ValuableCooled);
+
+            if (containsWrongType)
+                throw new ArgumentException("Not all containers are of type Valuable");
+
+            if (valuableContainers.Count > Stacks.Count)
+                throw new ArgumentException(
+                $"Too many valuable containers for this row, only add the ships width amount of valuable containers (= {Stacks.Count})");
+
+            foreach (var stack in Stacks)
+            {
+                bool result = stack.TryAddContainer(valuableContainers[0]);
+                if (!result)
+                    FailedContainers.Add(valuableContainers[0]);
+
+                valuableContainers.RemoveAt(0);
+                if (valuableContainers.Count == 0)
+                    break;
+            }
+
+            if (valuableContainers.Count > 0)
+                throw new Exception(
+                "Not all valuable containers could be added to the row, this should not happen, and should have been caught earlier");
+
+            UpdateFullStatus();
         }
-        else
+
+        private void UpdateFullStatus()
         {
-            AddStacks(shipWidth);
+            IsFull = Stacks.All(stack => stack.IsFull());
+        }
+
+        private int CalculateSideWeight(ShipSide side)
+        {
+            int totalWeight = 0;
+            foreach (var stack in Stacks)
+            {
+                if (stack.Position == side)
+                {
+                    totalWeight += stack.CalculateTotalWeight();
+                }
+            }
+            return totalWeight;
+        }
+
+        public bool MoveBottomContainersToTop()
+        {
+            foreach (var stack in Stacks)
+            {
+                bool success = stack.MoveBottomContainerToTop();
+                if (!success)
+                    return false;
+            }
+            return true;
         }
     }
-
-    private void AddStacks(int shipWidth)
-    {
-        for (int i = 0; i < shipWidth / 2; i++)
-        {
-            Stacks.Add(new ContainerStack(ShipSide.Left));
-            Stacks.Add(new ContainerStack(ShipSide.Right));
-        }
-    }
-
-    #endregion
 }

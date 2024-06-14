@@ -111,3 +111,4 @@
 /home/max/RiderProjects/Container voervoer 2.0/UnitTests/obj/Debug/net8.0/UnitTests.pdb
 /home/max/RiderProjects/Container voervoer 2.0/UnitTests/obj/Debug/net8.0/UnitTests.genruntimeconfig.cache
 /home/max/RiderProjects/Container voervoer 2.0/UnitTests/obj/Debug/net8.0/ref/UnitTests.dll
+/home/max/RiderProjects/Container voervoer 2.0/UnitTests/obj/Debug/net8.0/UnitTests.sourcelink.json
