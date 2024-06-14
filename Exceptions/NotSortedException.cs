@@ -1,4 +1,4 @@
-namespace Core;
+namespace Exceptions;
 
 public class NotSortedException : Exception
 {

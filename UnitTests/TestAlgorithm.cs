@@ -1,3 +1,7 @@
+using Core.ContainerStorage;
+using Core.Enums;
+using Exceptions;
+
 namespace UnitTests;
 
 [TestClass]
@@ -108,4 +112,6 @@ public class TestAlgorithm
         Assert.AreEqual(101, allOutputContainers.Count);
 
     }
+    
+    //[ExpectedException(typeof(ContainerOverWeightException))]
 }
