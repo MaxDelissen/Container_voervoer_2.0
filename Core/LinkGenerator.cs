@@ -27,10 +27,9 @@ public class LinkGenerator
             // Iterate over rows (length)
             for (int j = 0; j < shipLength; j++)
             {
-                // Ensure the row exists
                 if (j >= ship.Count || i >= ship[j].SortedStacks.Count)
                 {
-                    continue; // Skip if row or stack does not exist
+                    continue;
                 }
 
                 foreach (var container in ship[j].SortedStacks[i].Containers)

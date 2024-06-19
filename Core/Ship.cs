@@ -18,7 +18,7 @@ public class Ship
 
     public List<ContainerRow> SortedRows
     {
-        get => sortedRows ?? throw new NotSortedException("The rows are not sorted.");
+        get => sortedRows ?? throw new NotSortedException();
         private set => sortedRows = value;
     }
     public int Width { get; } // Width of the ship (left to right)
