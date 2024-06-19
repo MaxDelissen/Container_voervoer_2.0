@@ -184,5 +184,10 @@ namespace Core.ContainerStorage
             }
             return true;
         }
+
+        public object CalculateTotalWeight()
+        {
+            return Stacks.Sum(stack => stack.CalculateTotalWeight());
+        }
     }
 }

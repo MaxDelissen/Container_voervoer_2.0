@@ -162,7 +162,8 @@ public class Ship
 
     private void PlaceNormalContainer(List<ContainerRow> rows, Container container)
     {
-        foreach (var row in rows)
+        var lightestSortRows = rows.OrderBy(r => r.CalculateTotalWeight()).ToList();
+        foreach (var row in lightestSortRows)
         {
             if (row.TryAddContainer(container))
             {
