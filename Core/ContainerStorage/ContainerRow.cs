@@ -127,6 +127,9 @@ namespace Core.ContainerStorage
 
             foreach (var stack in Stacks)
             {
+                if (valuableContainers.Count == 0)
+                    break;
+                
                 int stackHeight = stack.Containers.Count;
                 int stackIndex = stack.LeftRightIndex -1;
                 int previousRowHeight = hasPreviousRow ? previousRow!.Stacks[stackIndex].Containers.Count : 0;

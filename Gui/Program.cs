@@ -14,19 +14,48 @@ namespace Gui
 
             while (true)
             {
-                Ship? ship = CreateShip();
-                if (ship == null) continue;
-
-                while (true)
+                Persistence persistence = new();
+                Console.WriteLine("Do you want to load a saved ship layout? (Y/N)");
+                if (ContainerGeneratorHelper.GetYesNoInput())
                 {
-                    if (!AddContainersToShip(ship)) break;
+                    Console.WriteLine("Please enter the ID of the layout you want to load.");
+                    string? input = Console.ReadLine();
+                    if (int.TryParse(input, out int id))
+                    {
+                        try
+                        {
+                            var layout = persistence.LoadLayout(id);
+                            Ship ship = new(layout.shipWidth, layout.shipLength);
+                            ship.AddContainers(layout.shipContainersToSort);
+                            SortAndDisplayResults(ship, true);
+                            GenerateVisualizerLink(ship);
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            Console.WriteLine("The file could not be found.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Please enter a valid ID.");
+                    }
                 }
-               
-                SortResult result = SortAndDisplayResults(ship);
-
-                if (result == SortResult.Success || result == SortResult.SuccesWithFailedContainers)
+                else
                 {
-                    if (!GenerateVisualizerLink(ship)) break;
+                    Ship? ship = CreateShip();
+                    if (ship == null) continue;
+
+                    while (true)
+                    {
+                        if (!AddContainersToShip(ship)) break;
+                    }
+                    
+                    SortResult result = SortAndDisplayResults(ship, false);
+
+                    if (result == SortResult.Success || result == SortResult.SuccesWithFailedContainers)
+                    {
+                        if (!GenerateVisualizerLink(ship)) break;
+                    }
                 }
             }
             
@@ -109,8 +138,15 @@ namespace Gui
             return ContainerGeneratorHelper.GetYesNoInput();
         }
 
-        private static SortResult SortAndDisplayResults(Ship ship)
+        private static SortResult SortAndDisplayResults(Ship ship, bool loadedFromSave)
         {
+            if (!loadedFromSave)
+            {
+                Persistence persistence = new();
+                int id = persistence.SaveLayout(ship.Length, ship.Width, ship.ContainersToSort);
+                Console.WriteLine($"The ship layout has been saved with ID: {id}");
+            }
+            
             Console.WriteLine("Press enter to confirm sorting the containers.");
             Console.ReadLine();
 

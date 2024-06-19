@@ -148,9 +148,10 @@ public class Ship
         int valuableIndex = 1;
         while (valuableIndex < Length)
         {
-            var containersToAdd = valuableContainers.Take(Width).ToList();
+            int containersToRemove = Math.Min(Width, valuableContainers.Count);
+            var containersToAdd = valuableContainers.Take(containersToRemove).ToList();
             rows[valuableIndex].MakeValuableRow(containersToAdd, rows[valuableIndex - 1], valuableIndex + 1 < Length ? rows[valuableIndex + 1] : null);
-            valuableContainers.RemoveRange(0, Width);
+            valuableContainers.RemoveRange(0, containersToRemove);
             valuableIndex++;
             if (((float)valuableIndex + 1) % 3 == 0)
             {
