@@ -2,11 +2,18 @@ using Core.Enums;
 
 namespace Core.ContainerStorage;
 
-public class ContainerStack(ShipSide position)
+public class ContainerStack
 {
+    public ContainerStack(ShipSide position, int leftRightIndex)
+    {
+        Position = position;
+        LeftRightIndex = leftRightIndex;
+    }
+    
     public List<Container> Containers { get; } = new();
+    public int LeftRightIndex { get; private set; }
 
-    public ShipSide Position { get; private set; } = position;
+    public ShipSide Position { get; private set; }
 
     public int CalculateTotalWeight()
     {

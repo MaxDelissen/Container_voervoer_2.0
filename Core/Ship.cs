@@ -62,7 +62,8 @@ public class Ship
             return error.Value;
 
         //Splitting the containers into different categories using the divider class.
-        var (cooledContainers, valuableContainers, valuableCooledContainers, normalContainers) =
+        //ValuableCooled, Valuable, Cooled, Normal
+        var (valuableCooledContainers, valuableContainers, cooledContainers, normalContainers) =
             divider.DivideContainers(containersToSort);
 
         // Creating rows on the ship to place the containers in.
@@ -74,7 +75,10 @@ public class Ship
 
         // Placing valuable cooled containers on the first row
         if (valuableCooledContainers.Any())
-            rows[0].MakeValuableRow(valuableCooledContainers);
+        {
+            ContainerRow? nextRow = Length > 1 ? rows[1] : null;
+            rows[0].MakeValuableRow(valuableCooledContainers, null, nextRow);
+        }
 
         // Placing valuable containers on the ship, in a 1,2,skip pattern
         if (valuableContainers.Any())
@@ -145,7 +149,7 @@ public class Ship
         while (valuableIndex < Length)
         {
             var containersToAdd = valuableContainers.Take(Width).ToList();
-            rows[valuableIndex].MakeValuableRow(containersToAdd);
+            rows[valuableIndex].MakeValuableRow(containersToAdd, rows[valuableIndex - 1], valuableIndex + 1 < Length ? rows[valuableIndex + 1] : null);
             valuableContainers.RemoveRange(0, Width);
             valuableIndex++;
             if (((float)valuableIndex + 1) % 3 == 0)
