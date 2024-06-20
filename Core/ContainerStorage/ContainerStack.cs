@@ -20,8 +20,19 @@ public class ContainerStack
         return Containers.Sum(c => c.Weight);
     }
 
-    public bool TryAddContainer(Container container)
+    public bool TryAddContainer(Container container, ContainerStack? nextStack, ContainerStack? previousStack)
     {
+        bool nextHasValuable = nextStack != null && nextStack.HasValueble();
+        bool previousHasValuable = previousStack != null && previousStack.HasValueble();
+        if (nextHasValuable && nextStack.Containers.Count -1 <= Containers.Count)
+        {
+            return false;
+        }
+        if (previousHasValuable && previousStack.Containers.Count -1 <= Containers.Count)
+        {
+            return false;
+        }
+        
         int newContainerWeight = container.Weight;
         if (WillBeOverWeight(newContainerWeight))
         {
@@ -30,6 +41,11 @@ public class ContainerStack
 
         Containers.Add(container);
         return true;
+    }
+
+    private bool HasValueble()
+    {
+        return Containers.Any(container => container.Type == ContainerType.Valuable);
     }
 
     private bool WillBeOverWeight(int newContainerWeight)

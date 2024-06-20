@@ -92,7 +92,7 @@ public class Ship
         {
             foreach (var container in cooledContainers)
             {
-                rows[0].TryAddContainer(container);
+                rows[0].TryAddContainer(container, null, null);
             }
         }
 
@@ -166,7 +166,9 @@ public class Ship
         var lightestSortRows = rows.OrderBy(r => r.CalculateTotalWeight()).ToList();
         foreach (var row in lightestSortRows)
         {
-            if (row.TryAddContainer(container))
+            var nextRow = rows.IndexOf(row) + 1 < Length ? rows[rows.IndexOf(row) + 1] : null;
+            var previousRow = rows.IndexOf(row) - 1 >= 0 ? rows[rows.IndexOf(row) - 1] : null;
+            if (row.TryAddContainer(container, nextRow, previousRow))
             {
                 return;
             }
