@@ -50,7 +50,7 @@ namespace Core.ContainerStorage
 
         #endregion
 
-        public bool TryAddContainer(Container container)
+        public bool TryAddContainer(Container container, ContainerRow? nextRow, ContainerRow? previousRow)
         {
             if (IsFull)
                 return false;
@@ -62,14 +62,14 @@ namespace Core.ContainerStorage
 
             if (centerWeight < leftWeight && centerWeight < rightWeight) //Check if center is lightest
             {
-                if (TryPlaceContainerOnSide(container, ShipSide.Center))
+                if (TryPlaceContainerOnSide(container, ShipSide.Center, nextRow, previousRow))
                 {
                     return true;
                 }
             }
             
             ShipSide lightestSide = leftWeight < rightWeight ? ShipSide.Left : ShipSide.Right; //Place on lightest side
-            if (TryPlaceContainerOnSide(container, lightestSide))
+            if (TryPlaceContainerOnSide(container, lightestSide, nextRow, previousRow))
             {
                 return true;
             }
@@ -81,7 +81,7 @@ namespace Core.ContainerStorage
 
             if (difference < maxDifference)
             {
-                if (TryPlaceContainerOnSide(container, ShipSide.Right))
+                if (TryPlaceContainerOnSide(container, lightestSide == ShipSide.Left ? ShipSide.Right : ShipSide.Left, nextRow, previousRow))
                 {
                     return true;
                 }
@@ -90,14 +90,16 @@ namespace Core.ContainerStorage
             return false;
         }
 
-        private bool TryPlaceContainerOnSide(Container container, ShipSide lightestSide)
+        private bool TryPlaceContainerOnSide(Container container, ShipSide lightestSide, ContainerRow? nextRow, ContainerRow? previousRow)
         {
             Stacks = Stacks.OrderBy(stack => stack.CalculateTotalWeight()).ToList();
             foreach (var stack in Stacks)
             {
                 if (stack.Position == lightestSide)
                 {
-                    if (stack.TryAddContainer(container))
+                    var nextStack = nextRow?.Stacks[stack.LeftRightIndex - 1];
+                    var previousStack = previousRow?.Stacks[stack.LeftRightIndex - 1];
+                    if (stack.TryAddContainer(container, nextStack, previousStack))
                     {
                         UpdateFullStatus();
                         return true;
@@ -143,7 +145,7 @@ namespace Core.ContainerStorage
                     valuableContainers.RemoveAt(0);
                     continue;
                 }
-                bool result = stack.TryAddContainer(valuableContainers[0]);
+                bool result = stack.TryAddContainer(valuableContainers[0], null, null);
                 if (!result)
                     FailedContainers.Add(valuableContainers[0]);
 
