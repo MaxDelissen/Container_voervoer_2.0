@@ -9,8 +9,9 @@ namespace Gui
         static void Main(string[] args)
         {
             PrintAsciiIntro();
-            Console.WriteLine(" Max Delissen 2024");
-            Console.WriteLine("Semester 2 - Software - Fontys ICT Eindhoven\n");
+            Console.WriteLine("Max Delissen 2024");
+            Console.WriteLine("Semester 2 - Software - Fontys ICT Eindhoven");
+            Console.WriteLine("Version 1.0\n");
 
             while (true)
             {

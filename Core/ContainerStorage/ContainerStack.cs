@@ -47,7 +47,6 @@ public class ContainerStack
         try
         {
             //Get second container's weight, as the first one will be moved to the top at the end.
-            //Get second container's weight, as the first one will be moved to the top at the end.
             bottomContainerWeight = Containers.Count >= 2 ? Containers[1].Weight : 0;
         }
         catch (InvalidOperationException e)
