@@ -8,13 +8,13 @@ public class TestShip
     public void TestAddContainersToShip_ShipIncludeAddedContainers()
     {
         //Arrange
-        Ship ship = new Ship(3, 3);
-        List<Container> containers = new List<Container>
+        var ship = new Ship(3, 3);
+        var containers = new List<Container>
         {
-            new Container(ContainerType.ValuableCooled, 20),
-            new Container(ContainerType.Valuable, 20),
-            new Container(ContainerType.Cooled, 20),
-            new Container(ContainerType.Normal, 20)
+            new(ContainerType.ValuableCooled, 20),
+            new(ContainerType.Valuable, 20),
+            new(ContainerType.Cooled, 20),
+            new(ContainerType.Normal, 20)
         };
 
         //Act
@@ -22,7 +22,7 @@ public class TestShip
 
         //Assert
         Assert.AreEqual(containers.Count, ship.ContainersToSort.Count);
-        foreach (var container in containers)
+        foreach (Container container in containers)
         {
             Assert.IsTrue(ship.ContainersToSort.Contains(container));
         }
@@ -33,21 +33,21 @@ public class TestShip
     public void TestAddOverWeightContainerToShip_ThrowsException()
     {
         //Arrange
-        Ship ship = new Ship(3, 3);
-        List<Container> container = new List<Container>
+        var ship = new Ship(3, 3);
+        var container = new List<Container>
         {
-            new Container(ContainerType.Normal, 31)
+            new(ContainerType.Normal, 31)
         };
         ship.AddContainers(container);
     }
-    
+
     [TestMethod]
     [ExpectedException(typeof(NotSortedException))]
     public void TestRequestSortedRowsBeforeSorting_ThrowsException()
     {
         //Arrange
-        Ship ship = new Ship(3, 3);
-        
+        var ship = new Ship(3, 3);
+
         //Act
         var sortedRows = ship.SortedRows;
     }

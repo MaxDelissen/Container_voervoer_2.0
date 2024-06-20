@@ -14,6 +14,7 @@ public class ShipValidation(Ship ship)
             return SortResult.TooManyCooledValuableContainers;
         if (HasTooManyCooledContainers())
             return SortResult.TooManyCooledContainers;
+
         return null;
     }
 

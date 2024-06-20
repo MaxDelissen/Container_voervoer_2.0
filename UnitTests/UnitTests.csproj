@@ -22,7 +22,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Core\Core.csproj"/>
-        <ProjectReference Include="..\Gui\Gui.csproj" />
+        <ProjectReference Include="..\Gui\Gui.csproj"/>
     </ItemGroup>
 
 </Project>

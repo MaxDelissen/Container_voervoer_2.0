@@ -9,21 +9,21 @@ public static class TestHelpers
         int amountOfCContainers,
         int amountOfNContainers)
     {
-        Ship ship = new Ship(width, length);
-        List<Container> containers = new List<Container>();
-        for (int i = 0; i < amountOfCVContainers; i++)
+        var ship = new Ship(width, length);
+        var containers = new List<Container>();
+        for (var i = 0; i < amountOfCVContainers; i++)
         {
             containers.Add(new Container(ContainerType.ValuableCooled, GenerateRandomWeight()));
         }
-        for (int i = 0; i < amountOfVContainers; i++)
+        for (var i = 0; i < amountOfVContainers; i++)
         {
             containers.Add(new Container(ContainerType.Valuable, GenerateRandomWeight()));
         }
-        for (int i = 0; i < amountOfCContainers; i++)
+        for (var i = 0; i < amountOfCContainers; i++)
         {
             containers.Add(new Container(ContainerType.Cooled, GenerateRandomWeight()));
         }
-        for (int i = 0; i < amountOfNContainers; i++)
+        for (var i = 0; i < amountOfNContainers; i++)
         {
             containers.Add(new Container(ContainerType.Normal, GenerateRandomWeight()));
         }
@@ -43,21 +43,21 @@ public static class TestHelpers
         int amountOfNContainers,
         int nWeight)
     {
-        Ship ship = new Ship(width, length);
-        List<Container> containers = new List<Container>();
-        for (int i = 0; i < amountOfCVContainers; i++)
+        var ship = new Ship(width, length);
+        var containers = new List<Container>();
+        for (var i = 0; i < amountOfCVContainers; i++)
         {
             containers.Add(new Container(ContainerType.ValuableCooled, cVWeight));
         }
-        for (int i = 0; i < amountOfVContainers; i++)
+        for (var i = 0; i < amountOfVContainers; i++)
         {
             containers.Add(new Container(ContainerType.Valuable, vWeight));
         }
-        for (int i = 0; i < amountOfCContainers; i++)
+        for (var i = 0; i < amountOfCContainers; i++)
         {
             containers.Add(new Container(ContainerType.Cooled, cWeight));
         }
-        for (int i = 0; i < amountOfNContainers; i++)
+        for (var i = 0; i < amountOfNContainers; i++)
         {
             containers.Add(new Container(ContainerType.Normal, nWeight));
         }
@@ -68,7 +68,7 @@ public static class TestHelpers
 
     private static int GenerateRandomWeight()
     {
-        Random random = new Random();
+        var random = new Random();
         return random.Next(4, 30);
     }
 }

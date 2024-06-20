@@ -9,7 +9,7 @@ public class ContainerStack
         Position = position;
         LeftRightIndex = leftRightIndex;
     }
-    
+
     public List<Container> Containers { get; } = new();
     public int LeftRightIndex { get; private set; }
 
@@ -24,15 +24,15 @@ public class ContainerStack
     {
         bool nextHasValuable = nextStack != null && nextStack.HasValueble();
         bool previousHasValuable = previousStack != null && previousStack.HasValueble();
-        if (nextHasValuable && nextStack.Containers.Count -1 <= Containers.Count)
+        if (nextHasValuable && nextStack.Containers.Count - 1 <= Containers.Count)
         {
             return false;
         }
-        if (previousHasValuable && previousStack.Containers.Count -1 <= Containers.Count)
+        if (previousHasValuable && previousStack.Containers.Count - 1 <= Containers.Count)
         {
             return false;
         }
-        
+
         int newContainerWeight = container.Weight;
         if (WillBeOverWeight(newContainerWeight))
         {
@@ -57,9 +57,9 @@ public class ContainerStack
 
     private int CalculateMaxWeight()
     {
-        int maxWeightOnTop = 120;
+        var maxWeightOnTop = 120;
 
-        int bottomContainerWeight = 0;
+        var bottomContainerWeight = 0;
         try
         {
             //Get second container's weight, as the first one will be moved to the top at the end.
@@ -79,7 +79,7 @@ public class ContainerStack
     {
         if (Containers.Count() != 0)
         {
-            var bottomContainer = Containers[0];
+            Container bottomContainer = Containers[0];
             Containers.RemoveAt(0);
             Containers.Add(bottomContainer);
         }

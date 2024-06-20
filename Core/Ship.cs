@@ -6,29 +6,6 @@ namespace Core;
 
 public class Ship
 {
-    #region Properties
-
-    // List of containers to be sorted
-    private readonly List<Container> containersToSort = new();
-    public List<Container> ContainersToSort => containersToSort;
-    private List<ContainerRow>? sortedRows;
-    
-    private readonly ShipValidation validator;
-    private readonly ContainerDivider divider = new();
-
-    public List<ContainerRow> SortedRows
-    {
-        get => sortedRows ?? throw new NotSortedException();
-        private set => sortedRows = value;
-    }
-    public int Width { get; } // Width of the ship (left to right)
-    public int Length { get; } // Length of the ship (front to back)
-    public int MaxWeight { get; }
-    public int MinWeight { get; }
-    private List<Container> FailedContainers { get; } = new();
-
-    #endregion
-
     public Ship(int width, int length)
     {
         Width = width;
@@ -37,13 +14,37 @@ public class Ship
         MinWeight = MaxWeight / 2; // 50% of the max weight needs to be loaded to avoid tipping over
         validator = new ShipValidation(this);
     }
-        
+
     private int CalculateMaxWeight()
     {
         const int maxWeightPerStack = 150;
         int maxWeight = maxWeightPerStack * Width * Length;
         return maxWeight;
     }
+
+    #region Properties
+
+    // List of containers to be sorted
+    public List<Container> ContainersToSort { get; } = new();
+
+    private List<ContainerRow>? sortedRows;
+
+    private readonly ShipValidation validator;
+    private readonly ContainerDivider divider = new();
+
+    public List<ContainerRow> SortedRows
+    {
+        get => sortedRows ?? throw new NotSortedException();
+        private set => sortedRows = value;
+    }
+
+    public int Width { get; } // Width of the ship (left to right)
+    public int Length { get; } // Length of the ship (front to back)
+    public int MaxWeight { get; }
+    public int MinWeight { get; }
+    private List<Container> FailedContainers { get; } = new();
+
+    #endregion
 
     #region Container Management
 
@@ -52,7 +53,7 @@ public class Ship
         if (containers.Any(c => c.Weight > 30))
             throw new ContainerOverWeightException();
 
-        containersToSort.AddRange(containers);
+        ContainersToSort.AddRange(containers);
     }
 
     public SortResult SortContainers()
@@ -64,11 +65,11 @@ public class Ship
         //Splitting the containers into different categories using the divider class.
         //ValuableCooled, Valuable, Cooled, Normal
         var (valuableCooledContainers, valuableContainers, cooledContainers, normalContainers) =
-            divider.DivideContainers(containersToSort);
+            divider.DivideContainers(ContainersToSort);
 
         // Creating rows on the ship to place the containers in.
-        List<ContainerRow> rows = new List<ContainerRow>();
-        for (int i = 0; i < Length; i++)
+        var rows = new List<ContainerRow>();
+        for (var i = 0; i < Length; i++)
         {
             rows.Add(new ContainerRow(Width));
         }
@@ -90,7 +91,7 @@ public class Ship
         // Placing cooled containers on the first row
         if (cooledContainers.Any())
         {
-            foreach (var container in cooledContainers)
+            foreach (Container container in cooledContainers)
             {
                 rows[0].TryAddContainer(container, null, null);
             }
@@ -99,12 +100,12 @@ public class Ship
         // Placing normal containers, on top of the valuable containers, these will later be flipped.
         if (normalContainers.Any())
         {
-            foreach (var container in normalContainers)
+            foreach (Container container in normalContainers)
             {
                 PlaceNormalContainer(rows, container);
             }
         }
-        
+
         rows = MoveBottomContainersToTop(rows);
 
         SortedRows = rows;
@@ -118,20 +119,20 @@ public class Ship
     public List<Container> GetTotalFailedContainers()
     {
         var failedContainers = new List<Container>();
-        foreach (var row in SortedRows)
+        foreach (ContainerRow row in SortedRows)
         {
             failedContainers.AddRange(row.FailedContainers);
         }
-        failedContainers.AddRange(this.FailedContainers);
+        failedContainers.AddRange(FailedContainers);
         return failedContainers;
     }
 
     public List<Container> GetTotalPlacedContainers()
     {
         var placedContainers = new List<Container>();
-        foreach (var row in SortedRows)
+        foreach (ContainerRow row in SortedRows)
         {
-            foreach (var stack in row.Stacks)
+            foreach (ContainerStack stack in row.Stacks)
             {
                 placedContainers.AddRange(stack.Containers);
             }
@@ -145,7 +146,7 @@ public class Ship
 
     private List<Container> PlaceValuableContainers(List<Container> valuableContainers, List<ContainerRow> rows)
     {
-        int valuableIndex = 1;
+        var valuableIndex = 1;
         while (valuableIndex < Length)
         {
             int containersToRemove = Math.Min(Width, valuableContainers.Count);
@@ -164,10 +165,10 @@ public class Ship
     private void PlaceNormalContainer(List<ContainerRow> rows, Container container)
     {
         var lightestSortRows = rows.OrderBy(r => r.CalculateTotalWeight()).ToList();
-        foreach (var row in lightestSortRows)
+        foreach (ContainerRow row in lightestSortRows)
         {
-            var nextRow = rows.IndexOf(row) + 1 < Length ? rows[rows.IndexOf(row) + 1] : null;
-            var previousRow = rows.IndexOf(row) - 1 >= 0 ? rows[rows.IndexOf(row) - 1] : null;
+            ContainerRow? nextRow = rows.IndexOf(row) + 1 < Length ? rows[rows.IndexOf(row) + 1] : null;
+            ContainerRow? previousRow = rows.IndexOf(row) - 1 >= 0 ? rows[rows.IndexOf(row) - 1] : null;
             if (row.TryAddContainer(container, nextRow, previousRow))
             {
                 return;
@@ -179,7 +180,7 @@ public class Ship
     // Method to move the bottom containers to the top, this because the placing order is reversed.
     private List<ContainerRow> MoveBottomContainersToTop(List<ContainerRow> rows)
     {
-        foreach (var row in rows)
+        foreach (ContainerRow row in rows)
         {
             row.MoveBottomContainersToTop();
         }

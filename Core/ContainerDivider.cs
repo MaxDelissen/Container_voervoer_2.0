@@ -5,12 +5,13 @@ namespace Core;
 
 public class ContainerDivider
 {
-    public (List<Container> valuableCooledContainers, List<Container> valuableContainers, List<Container> cooledContainers, List<Container> normalContainers) DivideContainers(List<Container> containers)
+    public (List<Container> valuableCooledContainers, List<Container> valuableContainers, List<Container> cooledContainers, List<Container> normalContainers) DivideContainers(
+        List<Container> containers)
     {
-        List<Container> valuableCooledContainers = new List<Container>();
-        List<Container> valuableContainers = new List<Container>();
-        List<Container> cooledContainers = new List<Container>();
-        List<Container> normalContainers = new List<Container>();
+        var valuableCooledContainers = new List<Container>();
+        var valuableContainers = new List<Container>();
+        var cooledContainers = new List<Container>();
+        var normalContainers = new List<Container>();
 
         foreach (Container container in containers)
         {

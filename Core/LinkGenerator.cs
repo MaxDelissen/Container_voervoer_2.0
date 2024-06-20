@@ -7,7 +7,7 @@ public class LinkGenerator
 {
     public string ConvertShipToLink(Ship ship)
     {
-        List<ContainerRow> sortedContainers = ship.SortedRows;
+        var sortedContainers = ship.SortedRows;
         (string stacksString, string weightsString) = GetParameterStrings(sortedContainers, ship.Length, ship.Width);
 
         return ConvertShipToLink(ship, stacksString, weightsString);
@@ -18,25 +18,25 @@ public class LinkGenerator
 
     private (string stacksString, string weightsString) GetParameterStrings(List<ContainerRow> ship, int shipLength, int shipWidth)
     {
-        StringBuilder stacksBuilder = new StringBuilder();
-        StringBuilder weightsBuilder = new StringBuilder();
+        var stacksBuilder = new StringBuilder();
+        var weightsBuilder = new StringBuilder();
 
         // Iterate over columns (width)
-        for (int i = 0; i < shipWidth; i++)
+        for (var i = 0; i < shipWidth; i++)
         {
             // Iterate over rows (length)
-            for (int j = 0; j < shipLength; j++)
+            for (var j = 0; j < shipLength; j++)
             {
                 if (j >= ship.Count || i >= ship[j].SortedStacks.Count)
                 {
                     continue;
                 }
 
-                foreach (var container in ship[j].SortedStacks[i].Containers)
+                foreach (Container container in ship[j].SortedStacks[i].Containers)
                 {
                     stacksBuilder.Append((int)container.Type);
                     weightsBuilder.Append(container.Weight);
-                    
+
                     // Append '-' after each container, except the last one in a stack
                     stacksBuilder.Append("-");
                     weightsBuilder.Append("-");
@@ -67,7 +67,7 @@ public class LinkGenerator
                 weightsBuilder.Append("/");
             }
         }
-        
+
         // Remove the last '/' from both strings
         if (stacksBuilder.Length > 0 && stacksBuilder[^1] == '/')
         {

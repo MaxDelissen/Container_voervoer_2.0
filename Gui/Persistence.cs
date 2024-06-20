@@ -12,8 +12,8 @@ public class Persistence
         {
             Directory.CreateDirectory(folderPath);
         }
-        
-        int latestId = 0;
+
+        var latestId = 0;
         string[] files = Directory.GetFiles(folderPath);
         foreach (string file in files)
         {
@@ -37,10 +37,10 @@ public class Persistence
             newFile.WriteLine(container.Type);
             newFile.WriteLine(container.Weight);
         }
-        
+
         return latestId;
     }
-    
+
     public (int shipWidth, int shipLength, List<Container> shipContainersToSort) LoadLayout(int id)
     {
         string folderPath = GetFolderPath();
@@ -49,7 +49,7 @@ public class Persistence
         {
             throw new FileNotFoundException();
         }
-        
+
         using StreamReader file = File.OpenText(filePath);
         int shipWidth = int.Parse(file.ReadLine());
         int shipLength = int.Parse(file.ReadLine());
@@ -57,16 +57,13 @@ public class Persistence
         while (!file.EndOfStream)
         {
             string type = file.ReadLine();
-            ContainerType containerType = Enum.Parse<ContainerType>(type);
+            var containerType = Enum.Parse<ContainerType>(type);
             int weight = int.Parse(file.ReadLine());
             shipContainersToSort.Add(new Container(containerType, weight));
         }
-        
+
         return (shipWidth, shipLength, shipContainersToSort);
     }
-    
-    private string GetFolderPath()
-    {
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ContainerSorter");
-    }
+
+    private string GetFolderPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ContainerSorter");
 }

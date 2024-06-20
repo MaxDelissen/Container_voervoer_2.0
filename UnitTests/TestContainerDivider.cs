@@ -11,10 +11,10 @@ public class TestContainerDivider
         var containerDivider = new ContainerDivider();
         var containers = new List<Container>
         {
-            new Container(ContainerType.ValuableCooled, 20),
-            new Container(ContainerType.Valuable, 20),
-            new Container(ContainerType.Cooled, 20),
-            new Container(ContainerType.Normal, 20)
+            new(ContainerType.ValuableCooled, 20),
+            new(ContainerType.Valuable, 20),
+            new(ContainerType.Cooled, 20),
+            new(ContainerType.Normal, 20)
         };
 
         // Act

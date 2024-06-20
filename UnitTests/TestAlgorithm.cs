@@ -21,7 +21,7 @@ public class TestAlgorithm
         Assert.AreEqual(3, ship.SortedRows[2].Stacks.Count);
         string link = new LinkGenerator().ConvertShipToLink(ship);
         var failed = ship.GetTotalFailedContainers();
-        var failedCount = failed.Count;
+        int failedCount = failed.Count;
         int placed = ship.GetTotalPlacedContainers().Count;
         Assert.AreEqual(failedCount, 0);
         Assert.AreEqual(69, placed);
@@ -38,13 +38,13 @@ public class TestAlgorithm
         69, 20);
 
         //Act
-        var result = ship.SortContainers();
+        SortResult result = ship.SortContainers();
 
         //Assert
-        List<Container> placedContainers = ship.GetTotalPlacedContainers();
-        List<Container> failedContainers = ship.GetTotalFailedContainers();
-        List<Container> allOutputContainers = placedContainers.Concat(failedContainers).ToList();
-        var link = new LinkGenerator().ConvertShipToLink(ship);
+        var placedContainers = ship.GetTotalPlacedContainers();
+        var failedContainers = ship.GetTotalFailedContainers();
+        var allOutputContainers = placedContainers.Concat(failedContainers).ToList();
+        string link = new LinkGenerator().ConvertShipToLink(ship);
 
         Assert.IsTrue(result == SortResult.Success);
         Assert.AreEqual(3, ship.SortedRows.Count);
